@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "new-employee-3a30c"
+  },
+  "targets": {
+    "new-employee-3a30c": {
+      "storage": {
+        "default": [
+          "new-employee-3a30c.firebasestorage.app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

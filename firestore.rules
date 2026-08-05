@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// This app never talks to Firestore from the browser — every read and write
+// goes through Next.js server code using the Admin SDK, which bypasses these
+// rules entirely. Deny all direct client access; if a client SDK is ever
+// added later, replace this with real per-collection rules first.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
