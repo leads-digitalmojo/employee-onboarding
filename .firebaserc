@@ -8,6 +8,11 @@
         "default": [
           "new-employee-3a30c.firebasestorage.app"
         ]
+      },
+      "hosting": {
+        "employee-onboarding": [
+          "employee-onboarding-9057a"
+        ]
       }
     }
   },
