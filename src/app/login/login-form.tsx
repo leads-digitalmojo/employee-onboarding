@@ -68,7 +68,13 @@ export default function LoginForm() {
         await finishSignIn(idToken);
       })
       .catch(() => {
-        setError("Could not complete Google sign-in. Please try again.");
+        // Chrome can evict a background tab's IndexedDB mid-flow under memory
+        // pressure (many open tabs, Incognito), surfacing as a generic
+        // "Database is closing" error — a plain retry with fewer tabs open
+        // usually succeeds.
+        setError(
+          "Could not complete Google sign-in — this can happen if the browser closed the sign-in session early. Please try again, ideally with fewer tabs open.",
+        );
       })
       .finally(() => setCheckingRedirect(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,7 +83,14 @@ export default function LoginForm() {
   async function handleSignIn() {
     setLoading(true);
     setError(null);
-    await signInWithRedirect(clientAuth, googleProvider);
+    try {
+      await signInWithRedirect(clientAuth, googleProvider);
+    } catch {
+      // If this throws, the browser never left the page — surface it instead
+      // of leaving the button stuck on "Signing in…" forever.
+      setError("Could not start Google sign-in. Please try again.");
+      setLoading(false);
+    }
   }
 
   return (
