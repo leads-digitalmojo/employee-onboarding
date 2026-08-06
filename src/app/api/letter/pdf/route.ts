@@ -26,12 +26,11 @@ export async function GET() {
   const pdf = await buildLetterPdf({
     pages,
     employeeName: letter.full_name,
-    employeeCode: letter.employee_code,
     letterNumber: letter.letter_number,
     signatures,
   });
 
-  const filename = `Appointment-Letter-${letter.employee_code}.pdf`;
+  const filename = `Appointment-Letter-${letter.full_name.replace(/\s+/g, "-")}.pdf`;
   return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",

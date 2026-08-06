@@ -10,6 +10,21 @@ export default async function RolePage() {
   if (!user) redirect("/login");
   if (await getLetter(user.id)) redirect("/onboarding/appointment-letter");
 
+  if (!user.joining_date) {
+    return (
+      <div className="space-y-8">
+        <header>
+          <h1 className="page-title">Welcome, {user.full_name.split(" ")[0]}</h1>
+          <p className="page-sub mt-1">
+            Your account is signed in, but People Operations hasn&apos;t set your date of joining yet.
+            Your appointment letter can&apos;t be prepared until they do — check back soon, or reach
+            out to People Operations directly.
+          </p>
+        </header>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <header>
@@ -19,17 +34,13 @@ export default async function RolePage() {
         </h1>
         <p className="page-sub mt-1">
           Confirm the role you have been appointed to and we will prepare your appointment letter.
-          Everything else is taken from your employee record.
         </p>
       </header>
 
       <section className="card">
         <h2 className="section-title mb-4">Your record</h2>
         <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          {[
-            ["Date of joining", formatDate(user.joining_date)],
-            ["Work location", user.work_location],
-          ].map(([label, value]) => (
+          {[["Date of joining", formatDate(user.joining_date)]].map(([label, value]) => (
             <div key={label}>
               <dt className="stat-label">{label}</dt>
               <dd className="mt-0.5 text-[15px] font-medium">{value}</dd>
@@ -38,7 +49,7 @@ export default async function RolePage() {
         </dl>
         <p className="banner-note mt-5">
           Your date of joining is fixed by People Operations and is not affected by when you log in or
-          sign. If any detail above is wrong, contact People Operations before continuing.
+          sign. If it&apos;s wrong, contact People Operations before continuing.
         </p>
       </section>
 

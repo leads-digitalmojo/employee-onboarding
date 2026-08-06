@@ -5,13 +5,9 @@ export type User = {
   id: string;
   email: string;
   full_name: string;
-  employee_code: string;
-  designation: string;
-  department: string;
-  work_location: string;
-  annual_ctc: number;
-  joining_date: string;
-  reporting_to: string;
+  /** Set by HR once the employee's start date is confirmed. Role selection
+   *  (and thus letter generation) stays locked until this is set. */
+  joining_date: string | null;
   is_admin: number;
   created_at?: string;
   letter_issue_date?: string | null;

@@ -20,7 +20,6 @@ export default async function AttendancePolicyPage() {
       initialSignatures={{}}
       initialAccepted={accepted}
       employeeName={user.full_name}
-      employeeCode={user.employee_code}
       consentText="I confirm that I have read and understood the Attendance Policy, including the Revised Late Coming Policy 2026 and the consequences of late arrival and unauthorised absence, and I agree to comply with it."
       requiresSignature={false}
     />

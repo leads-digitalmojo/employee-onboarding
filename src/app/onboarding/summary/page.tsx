@@ -58,13 +58,10 @@ export default async function SummaryPage() {
         <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           {[
             ["Name", user.full_name],
-            ["Employee code", user.employee_code],
             ["Email", user.email],
-            ["Designation", user.designation],
-            ["Department", user.department],
-            ["Date of joining", formatDate(user.joining_date)],
-            ["Work location", user.work_location],
-            ["Reporting to", user.reporting_to],
+            ["Designation", letter?.designation ?? "—"],
+            ["Department", letter?.department ?? "—"],
+            ["Date of joining", user.joining_date ? formatDate(user.joining_date) : "—"],
           ].map(([label, value]) => (
             <div key={label}>
               <dt className="stat-label">{label}</dt>

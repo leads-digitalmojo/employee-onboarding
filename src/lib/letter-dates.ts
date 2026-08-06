@@ -36,6 +36,6 @@ export function resolveIssueDate(src: LetterDateSource): string {
   return provisioned > joining ? joining : provisioned;
 }
 
-export function buildLetterNumber(prefix: string, employeeCode: string, issuedOn: string): string {
-  return `${prefix.toUpperCase()}/APPT/${issuedOn.slice(0, 4)}/${employeeCode}`;
+export function buildLetterNumber(prefix: string, userId: string, issuedOn: string): string {
+  return `${prefix.toUpperCase()}/APPT/${issuedOn.slice(0, 4)}/${userId.slice(0, 8).toUpperCase()}`;
 }

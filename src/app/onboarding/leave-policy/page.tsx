@@ -20,7 +20,6 @@ export default async function LeavePolicyPage() {
       initialSignatures={{}}
       initialAccepted={accepted}
       employeeName={user.full_name}
-      employeeCode={user.employee_code}
       consentText="I confirm that I have read and understood the Leave, Work & Rewards Policy 2026 in full — including the work structure, leave entitlements, the Work From Home rules and the criteria for the Special Rewards Program — and I agree to apply for and avail leave and WFH in accordance with it."
       requiresSignature={false}
     />

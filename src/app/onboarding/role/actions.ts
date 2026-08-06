@@ -13,6 +13,10 @@ export async function selectRoleAction(_prev: RoleState, formData: FormData): Pr
   // Already generated — never regenerate, even if this form is re-submitted.
   if (await getLetter(user.id)) redirect("/onboarding/appointment-letter");
 
+  if (!user.joining_date) {
+    return { error: "People Operations hasn't set your date of joining yet." };
+  }
+
   const roleKey = String(formData.get("role_key") ?? "");
   if (!findRole(roleKey)) {
     return { error: "Please choose the role you have been appointed to." };

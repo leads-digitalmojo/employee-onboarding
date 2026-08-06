@@ -16,7 +16,6 @@ type Props = {
   initialSignatures: Record<number, string>;
   initialAccepted: boolean;
   employeeName: string;
-  employeeCode: string;
   consentText: string;
   /** True only for the appointment letter: every page carries its own signature. */
   requiresSignature: boolean;
@@ -31,7 +30,6 @@ export default function DocumentSigner({
   initialSignatures,
   initialAccepted,
   employeeName,
-  employeeCode,
   consentText,
   requiresSignature,
   downloadHref,
@@ -185,7 +183,7 @@ export default function DocumentSigner({
           <p className="stat-label stat-label-dark">{docTitle}</p>
           <h2 className="section-title mt-1">{page.title}</h2>
           <p className="mt-1 text-[13px] tracking-[0.03em]">
-            Page {page.page} of {pages.length} · {employeeName} ({employeeCode})
+            Page {page.page} of {pages.length} · {employeeName}
           </p>
         </header>
 

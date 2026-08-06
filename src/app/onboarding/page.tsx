@@ -9,7 +9,8 @@ export default async function OnboardingDashboard() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   // First login: the letter has to exist before there is a checklist to show.
-  if (!(await getLetter(user.id))) redirect("/onboarding/role");
+  const letter = await getLetter(user.id);
+  if (!letter) redirect("/onboarding/role");
 
   const steps = await getSteps(user);
   const remaining = steps.filter((s) => !s.complete);
@@ -21,8 +22,8 @@ export default async function OnboardingDashboard() {
       <header>
         <h1 className="page-title">Welcome, {user.full_name.split(" ")[0]}</h1>
         <p className="page-sub mt-1">
-          Joining as {user.designation}, {user.department} · Starting{" "}
-          {formatDate(user.joining_date)}
+          Joining as {letter.designation}, {letter.department} · Starting{" "}
+          {formatDate(letter.joining_date)}
         </p>
       </header>
 

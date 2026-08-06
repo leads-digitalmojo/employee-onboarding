@@ -13,12 +13,8 @@ export type AppointmentLetter = {
   letter_number: string;
   role_key: string;
   full_name: string;
-  employee_code: string;
   designation: string;
   department: string;
-  work_location: string;
-  annual_ctc: number;
-  reporting_to: string;
   joining_date: string;
   issued_on: string;
   pages_json: string;
@@ -50,6 +46,10 @@ export async function generateLetter(user: User, roleKey: string): Promise<Appoi
   const existing = await getLetter(user.id);
   if (existing) return existing;
 
+  if (!user.joining_date) {
+    throw new Error("Cannot generate a letter before People Operations sets the joining date.");
+  }
+
   const role = findRole(roleKey);
   if (!role) throw new Error(`Unknown role: ${roleKey}`);
 
@@ -74,15 +74,11 @@ export async function generateLetter(user: User, roleKey: string): Promise<Appoi
   const letter: AppointmentLetter = {
     user_id: user.id,
     // Internal reference for HR records — the printed letter carries no ref line.
-    letter_number: buildLetterNumber(COMPANY.shortName.replace(/\s+/g, ""), user.employee_code, issuedOn),
+    letter_number: buildLetterNumber(COMPANY.shortName.replace(/\s+/g, ""), user.id, issuedOn),
     role_key: role.key,
     full_name: user.full_name,
-    employee_code: user.employee_code,
     designation: role.designation,
     department: role.department,
-    work_location: user.work_location,
-    annual_ctc: user.annual_ctc,
-    reporting_to: user.reporting_to,
     joining_date: user.joining_date,
     issued_on: issuedOn,
     pages_json: JSON.stringify(pages),

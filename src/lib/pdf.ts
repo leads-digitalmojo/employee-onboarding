@@ -199,7 +199,6 @@ export type LetterSignature = {
 export type LetterPdfInput = {
   pages: DocPage[];
   employeeName: string;
-  employeeCode: string;
   letterNumber: string;
   signatures: LetterSignature[];
 };
@@ -290,7 +289,7 @@ export async function buildLetterPdf(input: LetterPdfInput): Promise<Uint8Array>
       });
       ctx.y -= 12;
       ctx.page.drawText(
-        `Signed electronically by ${input.employeeName} (${input.employeeCode}) on ${sig.signed_at} UTC` +
+        `Signed electronically by ${input.employeeName} on ${sig.signed_at} UTC` +
           (sig.ip_address ? ` from ${sig.ip_address}` : ""),
         { x: MARGIN, y: ctx.y, size: 7.5, font: regular, color: MUTED },
       );

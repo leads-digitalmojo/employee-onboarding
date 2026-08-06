@@ -26,7 +26,6 @@ export default async function AppointmentLetterPage() {
       initialSignatures={initialSignatures}
       initialAccepted={accepted}
       employeeName={letter.full_name}
-      employeeCode={letter.employee_code}
       consentText="I confirm that I have read and understood every page of this letter of appointment, that the digital signatures affixed above are mine, and that I accept the terms and conditions of employment set out in this letter."
       requiresSignature
       downloadHref="/api/letter/pdf"

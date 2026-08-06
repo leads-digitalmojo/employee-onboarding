@@ -9,14 +9,18 @@ const ALLOWED_DOMAIN = "digitalmojo.in";
  * popup) for an onboarding session — the same cookie-based session every
  * other route in the app already checks.
  *
- * Three checks, each returning a distinct error the UI can show:
+ * Two checks, each returning a distinct error the UI can show:
  *   1. The token itself is valid and freshly issued (Admin SDK verification).
  *   2. The account's email is on the digitalmojo.in domain — this is the
  *      access control, not the `hd` hint set client-side, which a user can
  *      simply not have and still complete the popup.
- *   3. HR has actually provisioned a record for this email. Google only
- *      proves *who* someone is, not that they're an employee due to onboard —
- *      that's still owned by the `users` collection, unchanged.
+ *
+ * Anyone who clears both checks gets a session, creating their `users` doc
+ * on the spot if this is their first sign-in. That doc starts without a
+ * joining_date — People Operations sets that separately (via `npm run
+ * seed`), and the app gates role selection / letter generation on it being
+ * present, since it's frozen into the legal appointment letter and isn't
+ * something an employee should be able to self-report.
  */
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -44,15 +48,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const snap = await db().collection("users").where("email", "==", email.toLowerCase()).limit(1).get();
-  const userDoc = snap.docs[0];
-  if (!userDoc) {
-    return NextResponse.json(
-      { error: "No onboarding record found for this account yet. Contact People Operations." },
-      { status: 404 },
-    );
-  }
+  const normalizedEmail = email.toLowerCase();
+  const usersRef = db().collection("users");
+  const snap = await usersRef.where("email", "==", normalizedEmail).limit(1).get();
+  const existing = snap.docs[0];
 
-  await createSession(userDoc.id);
+  const userId = existing
+    ? existing.id
+    : (
+        await usersRef.add({
+          email: normalizedEmail,
+          full_name: decoded.name ?? normalizedEmail,
+          joining_date: null,
+          is_admin: 0,
+          created_at: new Date().toISOString(),
+        })
+      ).id;
+
+  await createSession(userId);
   return NextResponse.json({ ok: true });
 }

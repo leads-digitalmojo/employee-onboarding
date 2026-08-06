@@ -26,7 +26,7 @@ export default async function OnboardingLayout({ children }: { children: React.R
           <div className="ml-auto flex items-center gap-4">
             <div className="hidden text-right sm:block">
               <p className="text-[15px] font-semibold">{user.full_name}</p>
-              <p className="helper">{user.employee_code}</p>
+              <p className="helper">{user.email}</p>
             </div>
             <form action={logoutAction}>
               <button type="submit" className="btn btn-secondary px-4 py-2 text-[13px]">
