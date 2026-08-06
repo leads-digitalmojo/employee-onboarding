@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   getRedirectResult,
   signInWithPopup,
@@ -35,7 +34,6 @@ function GoogleLogo() {
 }
 
 export default function LoginForm() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   // True while we check whether this page load is Google redirecting the
   // user back after sign-in — avoids a flash of the button in that case.
@@ -58,8 +56,7 @@ export default function LoginForm() {
       return;
     }
 
-    router.push("/onboarding");
-    router.refresh();
+    window.location.href = "/onboarding";
   }
 
   useEffect(() => {
@@ -120,7 +117,10 @@ export default function LoginForm() {
         }
       }
 
-      setError("Could not complete Google sign-in. Please try again.");
+      console.error("[sign-in] popup failed:", code, err);
+      setError(
+        `Could not complete Google sign-in${code ? ` (${code})` : ""}. Please try again.`,
+      );
       setLoading(false);
     }
   }

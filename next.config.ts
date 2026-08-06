@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // Uploaded signatures are base64 PNGs; give route handlers room to breathe.
   experimental: {
     serverActions: { bodySizeLimit: "12mb" },
