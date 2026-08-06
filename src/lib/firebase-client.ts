@@ -34,4 +34,10 @@ export const googleProvider = new GoogleAuthProvider();
 // UX hint only — nudges Google's account chooser toward the right domain.
 // Not a security boundary; the server re-checks the domain on the verified
 // token regardless of what this sends.
-googleProvider.setCustomParameters({ hd: "digitalmojo.in" });
+googleProvider.setCustomParameters({
+  hd: "digitalmojo.in",
+  // Without this Google silently reuses whichever account is first in the
+  // browser profile (authuser=0), which for anyone signed into several
+  // company accounts is rarely the one they're onboarding with.
+  prompt: "select_account",
+});
