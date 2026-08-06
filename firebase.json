@@ -4,11 +4,18 @@
     "rootDir": "/",
     "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", ".next"]
   },
-  "hosting": {
-    "target": "employee-onboarding",
-    "source": ".",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
-  },
+  "hosting": [
+    {
+      "target": "employee-onboarding",
+      "source": ".",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    },
+    {
+      "target": "default-site",
+      "public": ".auth-placeholder-site",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
