@@ -11,10 +11,29 @@ import { GoogleAuthProvider, getAuth } from "firebase/auth";
  * `/api/auth/google`, which is where the actual authorization decision
  * (right domain, has an HR record) is made.
  */
+const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+/**
+ * In production, authDomain must be the app's *own* domain, so the sign-in
+ * redirect stays same-origin — Chrome partitions storage between origins, and
+ * a cross-origin handler silently loses the sign-in result on the way back.
+ *
+ * Localhost can't serve Firebase's /__/auth/handler itself, so it has to
+ * borrow the project's firebaseapp.com handler. That's fine: `localhost` is an
+ * authorized domain, and browsers exempt it from the storage restrictions
+ * that make this arrangement fail in production.
+ */
+function resolveAuthDomain(): string | undefined {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return `${projectId}.firebaseapp.com`;
+  }
+  return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+}
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  authDomain: resolveAuthDomain(),
+  projectId,
 };
 
 const app = getApps()[0] ?? initializeApp(firebaseConfig);
