@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { getRedirectResult, signInWithRedirect, signOut } from "firebase/auth";
 import { clientAuth, googleProvider } from "@/lib/firebase-client";
 
 /** The official multi-colour "G" mark — required as-is by Google's brand guidelines. */
@@ -32,41 +32,52 @@ function GoogleLogo() {
 export default function LoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  // True while we check whether this page load is Google redirecting the
+  // user back after sign-in — avoids a flash of the button in that case.
+  const [checkingRedirect, setCheckingRedirect] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  async function finishSignIn(idToken: string) {
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      // The Google account itself signed in fine; it's just not authorized
+      // for this app. Sign it back out of the browser so a retry starts clean.
+      await signOut(clientAuth);
+      setError(data.error ?? "Sign-in failed. Please try again.");
+      return;
+    }
+
+    router.push("/onboarding");
+    router.refresh();
+  }
+
+  useEffect(() => {
+    // Google's own sign-in page sets a strict Cross-Origin-Opener-Policy that
+    // severs the popup/opener relationship, breaking signInWithPopup's
+    // popup-closed detection. A full-page redirect sidesteps that entirely.
+    getRedirectResult(clientAuth)
+      .then(async (result) => {
+        if (!result) return;
+        const idToken = await result.user.getIdToken();
+        await finishSignIn(idToken);
+      })
+      .catch(() => {
+        setError("Could not complete Google sign-in. Please try again.");
+      })
+      .finally(() => setCheckingRedirect(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSignIn() {
     setLoading(true);
     setError(null);
-    try {
-      const result = await signInWithPopup(clientAuth, googleProvider);
-      const idToken = await result.user.getIdToken();
-
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        // The Google account itself signed in fine; it's just not authorized
-        // for this app. Sign it back out of the browser so a retry starts clean.
-        await signOut(clientAuth);
-        setError(data.error ?? "Sign-in failed. Please try again.");
-        return;
-      }
-
-      router.push("/onboarding");
-      router.refresh();
-    } catch (err) {
-      // Cancelling the Google popup throws — that's not worth an error banner.
-      const code = (err as { code?: string })?.code;
-      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
-        setError("Could not open Google sign-in. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
+    await signInWithRedirect(clientAuth, googleProvider);
   }
 
   return (
@@ -74,11 +85,11 @@ export default function LoginForm() {
       <button
         type="button"
         onClick={handleSignIn}
-        disabled={loading}
+        disabled={loading || checkingRedirect}
         className="flex w-full items-center justify-center gap-3 rounded-[6px] border-[1.5px] border-black bg-white px-4 py-2.5 text-[14px] font-medium tracking-[0.02em] text-black transition hover:bg-[#f5f5f5] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <GoogleLogo />
-        {loading ? "Signing in…" : "Sign in with Google"}
+        {checkingRedirect ? "Loading…" : loading ? "Signing in…" : "Sign in with Google"}
       </button>
 
       {error && (
