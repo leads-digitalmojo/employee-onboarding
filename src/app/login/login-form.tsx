@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getRedirectResult, signInWithRedirect, signOut } from "firebase/auth";
+import {
+  getRedirectResult,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
+} from "firebase/auth";
 import { clientAuth, googleProvider } from "@/lib/firebase-client";
 
 /** The official multi-colour "G" mark — required as-is by Google's brand guidelines. */
@@ -84,11 +89,38 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
     try {
-      await signInWithRedirect(clientAuth, googleProvider);
-    } catch {
-      // If this throws, the browser never left the page — surface it instead
-      // of leaving the button stuck on "Signing in…" forever.
-      setError("Could not start Google sign-in. Please try again.");
+      // Popup keeps the whole exchange inside one page, so it never depends on
+      // storage surviving a cross-site round trip — the thing that made
+      // signInWithRedirect drop the result on the way back. Viable now only
+      // because authDomain is same-origin with the app.
+      const result = await signInWithPopup(clientAuth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      await finishSignIn(idToken);
+      setLoading(false);
+    } catch (err) {
+      const code = (err as { code?: string })?.code;
+
+      // Closing the popup deliberately isn't worth an error banner.
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        setLoading(false);
+        return;
+      }
+
+      // No popup available (blocker, embedded webview) — fall back to the
+      // full-page redirect, handled by getRedirectResult on the way back.
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        try {
+          await signInWithRedirect(clientAuth, googleProvider);
+          return;
+        } catch {
+          /* fall through to the generic error below */
+        }
+      }
+
+      setError("Could not complete Google sign-in. Please try again.");
       setLoading(false);
     }
   }
